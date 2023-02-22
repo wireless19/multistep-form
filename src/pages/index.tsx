@@ -1,6 +1,40 @@
-import React from "react"
+import React, { useState } from "react"
+import { useForm } from "react-hook-form"
+
+import Formone from "./Formone"
+import Formtwo from "./Formtwo"
+import Formthree from "./Formthree"
+
+const MAX_STEPS = 3
 
 const IndexPage = () => {
+  const [formStep, setFormStep] = useState(0)
+  const {
+    register,
+    getValues,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm({ mode: "all" })
+
+  function completeFormStep() {
+    setFormStep(formStep + 1)
+  }
+  function prevStep() {
+    setFormStep(formStep - 1)
+  }
+
+  function submitForm(values: any) {
+    if (formStep < 3) {
+      return completeFormStep()
+    }
+    window.alert(JSON.stringify(values, null, 2))
+  }
+
+  function getFormDetails() {
+    console.log(getValues(["username", "address"]))
+    console.log(getValues(["username", "address"]).length)
+  }
+
   return (
     <div className="min-h-screen bg-green-900 flex flex-col items-start text-gray-900 antialiased relative">
       <div
@@ -20,59 +54,76 @@ const IndexPage = () => {
       </div>
       <div className="max-w-xl w-full mt-24 mb-24 rounded-lg shadow-2xl bg-white mx-auto overflow-hidden z-10">
         <div className="px-16 py-10">
-          <form>
-            <h2 className="font-semibold text-3xl mb-8">
-              Personal Information
-            </h2>
-            <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              className="text-input"
-            />
-            <h2 className="font-semibold text-3xl mb-8">Billing Information</h2>
-            <label htmlFor="address">Address</label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              className="text-input"
-            />
-            <h2 className="font-semibold text-3xl mb-8">Legal Information</h2>
-            <div className="block mt-6">
-              <input
-                name="toc"
-                className="p-3 text-green-600 rounded mr-3 border-2 border-gray-300 ring-0 focus:ring-0 focus:ring-offset-0 focus:border-0 cursor-pointer"
-                type="checkbox"
-              />
-              <span>
-                I accept the{" "}
-                <a className="text-blue-400 underline" href="/">
-                  Terms and Conditions
-                </a>
-                .
-              </span>
+          <form onSubmit={handleSubmit(submitForm)}>
+            <div className="flex items-center mb-2">
+              {formStep > 0 && (
+                <button onClick={prevStep} type="button">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    className="w-6 text-gray-400 hover:text-gray-600 mr-2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15.75 19.5L8.25 12l7.5-7.5"
+                    />
+                  </svg>
+                </button>
+              )}
+              {formStep < MAX_STEPS && (
+                <p className="text-sm text-gray-700">
+                  step {formStep + 1} of {MAX_STEPS}
+                </p>
+              )}
             </div>
-            <div className="block mt-6">
-              <input
-                name="pp"
-                className="p-3 text-green-600 rounded mr-3 border-2 border-gray-300 ring-0 focus:ring-0 focus:ring-offset-0 focus:border-0 cursor-pointer"
-                type="checkbox"
+            {formStep >= 0 && (
+              <Formone
+                formStep={formStep}
+                register={register}
+                errors={errors}
               />
-              <span>
-                I accept the{" "}
-                <a className="text-blue-400 underline" href="/">
-                  Privacy Policy
-                </a>
-                .
-              </span>
-            </div>
+            )}
+            {formStep >= 1 && (
+              <Formtwo
+                formStep={formStep}
+                register={register}
+                errors={errors}
+              />
+            )}
+            {formStep >= 2 && (
+              <Formthree
+                formStep={formStep}
+                registerone={register}
+                registertwo={register}
+                errors={errors}
+              />
+            )}
+            {/* formStep === 3 */}
+            {formStep === 3 && (
+              <section>
+                <h5 className="font-semibold text-3xl mb-8">Summary</h5>
+                <h5>{getValues("username")}</h5>
+                <h5>{getValues("address")}</h5>
+              </section>
+            )}
+            {/* onSubmit={handleSubmit(submitForm)} */}
             <button
+              disabled={!isValid}
               type="submit"
               className="mt-6 bg-green-600 text-white rounded px-8 py-6 w-full disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              Create Account
+              {formStep < 3 ? "Next Step" : "Create Account"}
+            </button>
+            <button
+              type="button"
+              onClick={getFormDetails}
+              className="mt-6 bg-green-600 text-white rounded px-8 py-6 w-full disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              Save as Draft
             </button>
           </form>
         </div>
